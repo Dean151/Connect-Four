@@ -9,5 +9,8 @@ cabal-dev
 .cabal-sandbox/
 cabal.sandbox.config
 cabal.config
+<<<<<<< HEAD
 
 *.pdf
+=======
+>>>>>>> 59eb299c92baeb1fc0f3b5a0d473b29c84328406
