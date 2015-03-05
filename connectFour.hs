@@ -4,11 +4,15 @@
 ------------------------------------------------------------
 import Data.List
 
+-------------------
+-- STRUCTURE
+-------------------
+
 -- Creating the two colors for the players
-data Color = Red | Yellow deriving (Show)
+data Color = Red | Yellow deriving Eq
 
 -- A cell can be empty, or filled with one of the colors
-data Cell = Empty | Filled Color
+data Cell = Empty | Filled Color deriving Eq
 instance Show Cell where 
 	show Empty 			 = "   "
 	show (Filled Red) 	 = " ● "
@@ -26,6 +30,10 @@ printGrid g = tail $ concatMap (('\n' :) . (concatMap show)) (transpose g)
 emptyColumn = replicate 6 Empty
 grid = replicate 7 emptyColumn
 
+-------------------
+-- PLAYING
+-------------------
+
 -- adding a token in a column
 addToken::Column->Column->Color->Column
 addToken temp [] color = temp
@@ -33,5 +41,25 @@ addToken temp (Empty:xs) color = concat [temp, (Filled color:xs)]
 addToken temp (x:xs) color = addToken (temp++[x]) xs color
 
 
+-------------------
+-- CHECK FOR WINNER
+-------------------
+
+-- Summarize return a list of color, and the number of consecutive equals colors
+-- For instance : ..R.YY => [(.,2), (R,1), (.,1), (Y, 2)]
+summarizeHelper::Column -> Cell -> Int -> [(Cell, Int)] -> [(Cell, Int)]
+summarizeHelper (currentColor:xs) baseColor number list = 
+	if currentColor == baseColor
+		then summarizeHelper xs baseColor (number+1) list
+		else summarizeHelper xs currentColor 1 ((baseColor, number):list)
+summarizeHelper [] baseColor number list = ((baseColor, number):list)
+
+summarize::Column->[(Cell,Int)]
+summarize column = summarizeHelper column (column!!0) 0 []
+
+-- Diagonalize return a list with the composants of diagonals
+-- For instance diagonalize [[1,2],[3,4]] == [[1], [2, 3], [4]]
+diagonalize::Grid->Grid
+-- TODO diagonalize
 
 main = putStr $ printGrid grid
