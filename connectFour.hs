@@ -10,8 +10,8 @@ data Color = Red | Yellow deriving (Show)
 data Cell = Empty | Filled Color
 instance Show Cell where 
 	show Empty 			 = "   "
-	show (Filled Red) 	 = " R "
-	show (Filled Yellow) = " Y "
+	show (Filled Red) 	 = " ● "
+	show (Filled Yellow) = " ○ "
  
 -- Creating aliases types for Columns and Grid
 type Column = [Cell]
@@ -19,10 +19,14 @@ type Grid = [Column]
 
 -- Function to print a grid in Terminal
 printGrid::Grid->String
-printGrid p = tail $ concatMap (('\n' :) . (concatMap show)) p
+printGrid g = tail $ concatMap (('\n' :) . (concatMap show)) g
 
--- Creating the starting empty Grid
+-- Creating the initial empty Grid
 emptyColumn = replicate 6 Empty
 grid = replicate 7 emptyColumn
+
+-- adding a token in a column
+addToken::Column->Color->Column
+-- TODO adding token
 
 main = putStr $ printGrid grid
