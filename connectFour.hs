@@ -2,6 +2,7 @@
 -- Connect Four Game in Haskell Programming Language
 -- Created by Thomas Durand - 2015/03/05
 ------------------------------------------------------------
+import Data.List
 
 -- Creating the two colors for the players
 data Color = Red | Yellow deriving (Show)
@@ -19,7 +20,7 @@ type Grid = [Column]
 
 -- Function to print a grid in Terminal
 printGrid::Grid->String
-printGrid g = tail $ concatMap (('\n' :) . (concatMap show)) g
+printGrid g = tail $ concatMap (('\n' :) . (concatMap show)) (transpose g)
 
 -- Creating the initial empty Grid
 emptyColumn = replicate 6 Empty
