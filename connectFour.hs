@@ -30,6 +30,7 @@ printGrid g = tail $ concatMap (('\n' :) . (concatMap show)) (transpose g)
 emptyColumn = replicate 6 Empty
 grid = replicate 7 emptyColumn
 
+
 -------------------
 -- PLAYING
 -------------------
@@ -40,6 +41,7 @@ addToken temp [] color = temp
 addToken temp (Empty:xs) color = concat [temp, (Filled color:xs)]
 addToken temp (x:xs) color = addToken (temp++[x]) xs color
 
+replace number item list = left ++ (item:right) where (left, (_:right)) = splitAt number list
 
 -------------------
 -- CHECK FOR WINNER
@@ -59,7 +61,25 @@ summarize column = summarizeHelper column (column!!0) 0 []
 
 -- Diagonalize return a list with the composants of diagonals
 -- For instance diagonalize [[1,2],[3,4]] == [[1], [2, 3], [4]]
+addNothing::Column->Int->Bool->Column
+addNothing column 0 _ = column
+addNothing column index reverse = 
+	if reverse
+		then addNothing ([Empty]++column) (index-1) reverse
+		else addNothing (column++[Empty]) (index-1) reverse
+
+diagonalizeHelper::Grid->Int->Grid
+diagonalizeHelper [] _ = []
+diagonalizeHelper g index = 
+	if index == length g
+		then g
+		else diagonalizeHelper (replace index (addNothing (addNothing (g!!index) index True) ((length g)-index-1) False) g) (index+1) 
+
 diagonalize::Grid->Grid
--- TODO diagonalize
+diagonalize g = diagonalizeHelper g 0
+
+-------------------
+-- MAIN PROGRAM
+-------------------
 
 main = putStr $ printGrid grid
