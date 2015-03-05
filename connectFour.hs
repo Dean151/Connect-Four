@@ -27,7 +27,11 @@ emptyColumn = replicate 6 Empty
 grid = replicate 7 emptyColumn
 
 -- adding a token in a column
-addToken::Column->Color->Column
--- TODO adding token
+addToken::Column->Column->Color->Column
+addToken temp [] color = temp
+addToken temp (Empty:xs) color = concat [temp, (Filled color:xs)]
+addToken temp (x:xs) color = addToken (temp++[x]) xs color
+
+
 
 main = putStr $ printGrid grid
