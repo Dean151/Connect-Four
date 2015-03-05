@@ -17,6 +17,12 @@ instance Show Cell where
 type Column = [Cell]
 type Grid = [Column]
 
+-- Function to print a grid in Terminal
+printGrid::Grid->String
+printGrid p = tail $ concatMap (('\n' :) . (concatMap show)) p
+
 -- Creating the starting empty Grid
 emptyColumn = replicate 6 Empty
 grid = replicate 7 emptyColumn
+
+main = putStr $ printGrid grid
