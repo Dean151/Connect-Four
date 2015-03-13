@@ -39,7 +39,10 @@ _addToken temp (Empty:xs) color = concat [temp, (Filled color:xs)]
 _addToken temp (x:xs) color = _addToken (temp++[x]) xs color
 
 addToken::Column->Color->Column
-addToken column color = _addToken [] column color
+addToken column color = _addToken [] column color 
+
+play::Grid -> Color -> Int -> Grid
+play grid color num = (take (num-1) grid ) ++ [addToken (grid!!(num-1)) color] ++ (drop num grid)
 
 replace number item list = left ++ (item:right) where (left, (_:right)) = splitAt number list
 
@@ -100,4 +103,9 @@ won = listToMaybe.catMaybes.(map _won).allAlignments
 grid::Grid
 grid = replicate 7 (replicate 6 Empty)
 
-main = putStr $ printGrid grid
+-- Testing
+grid1 = play grid Yellow 1
+grid2 = play grid1 Yellow 1
+grid3 = play grid2 Red 7
+
+main = putStr $ printGrid grid3
