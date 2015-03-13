@@ -3,6 +3,7 @@
 -- Created by Thomas Durand, Thomas Buick, Bertille Chevillote - 2015/03/05
 -------------------------------------------------------------------------------
 import Data.List
+import Data.Maybe
 
 -------------------
 -- STRUCTURE
@@ -39,7 +40,7 @@ grid = replicate 7 emptyColumn
 _addToken::Column->Column->Color->Column
 _addToken temp [] color = temp
 _addToken temp (Empty:xs) color = concat [temp, (Filled color:xs)]
-_addToken temp (x:xs) color = addToken (temp++[x]) xs color
+_addToken temp (x:xs) color = _addToken (temp++[x]) xs color
 
 addToken::Column->Color->Column
 addToken column color = _addToken [] column color
@@ -80,6 +81,20 @@ _diagonalize g index =
 
 diagonalize::Grid->Grid
 diagonalize g = _diagonalize g 0
+
+
+-- Getting all alignments (horizontal, vertical, diagonals) in a single list
+allAlignments::Grid->[Column]
+allAlignments grid = concatMap ($ grid) [diagonalize, diagonalize.(map reverse), id, transpose]
+
+-- Won function return a color if there is a winner, and Nothing if there is no winner yet
+_won:: Column -> Maybe Color
+_won col | length col < 4 = Nothing
+_won (c:cs) | c==Empty || (or$map (/=c)$take (4-1) cs) = _won cs
+_won (Filled c:_) = Just c
+
+won:: Grid -> Maybe Color
+won = listToMaybe.catMaybes.(map _won).allAlignments
 
 -------------------
 -- MAIN PROGRAM
