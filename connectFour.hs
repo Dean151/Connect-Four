@@ -27,10 +27,6 @@ type Grid = [Column]
 printGrid::Grid->String
 printGrid g = tail $ concatMap (('\n' :) . (concatMap show)) (transpose g)
 
--- Creating the initial empty Grid
-emptyColumn = replicate 6 Empty
-grid = replicate 7 emptyColumn
-
 
 -------------------
 -- PLAYING
@@ -99,5 +95,9 @@ won = listToMaybe.catMaybes.(map _won).allAlignments
 -------------------
 -- MAIN PROGRAM
 -------------------
+
+-- Creating the initial empty Grid
+grid::Grid
+grid = replicate 7 (replicate 6 Empty)
 
 main = putStr $ printGrid grid
