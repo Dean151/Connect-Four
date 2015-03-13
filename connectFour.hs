@@ -1,7 +1,7 @@
-------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- Connect Four Game in Haskell Programming Language
--- Created by Thomas Durand - 2015/03/05
-------------------------------------------------------------
+-- Created by Thomas Durand, Thomas Buick, Bertille Chevillote - 2015/03/05
+-------------------------------------------------------------------------------
 import Data.List
 
 -------------------
@@ -14,7 +14,7 @@ data Color = Red | Yellow deriving Eq
 -- A cell can be empty, or filled with one of the colors
 data Cell = Empty | Filled Color deriving Eq
 instance Show Cell where 
-	show Empty 			 = "   "
+	show Empty 			 = " . "
 	show (Filled Red) 	 = " ● "
 	show (Filled Yellow) = " ○ "
  
@@ -36,10 +36,13 @@ grid = replicate 7 emptyColumn
 -------------------
 
 -- adding a token in a column
-addToken::Column->Column->Color->Column
-addToken temp [] color = temp
-addToken temp (Empty:xs) color = concat [temp, (Filled color:xs)]
-addToken temp (x:xs) color = addToken (temp++[x]) xs color
+_addToken::Column->Column->Color->Column
+_addToken temp [] color = temp
+_addToken temp (Empty:xs) color = concat [temp, (Filled color:xs)]
+_addToken temp (x:xs) color = addToken (temp++[x]) xs color
+
+addToken::Column->Color->Column
+addToken column color = _addToken [] column color
 
 replace number item list = left ++ (item:right) where (left, (_:right)) = splitAt number list
 
@@ -49,15 +52,15 @@ replace number item list = left ++ (item:right) where (left, (_:right)) = splitA
 
 -- Summarize return a list of color, and the number of consecutive equals colors
 -- For instance : ..R.YY => [(.,2), (R,1), (.,1), (Y, 2)]
-summarizeHelper::Column -> Cell -> Int -> [(Cell, Int)] -> [(Cell, Int)]
-summarizeHelper (currentColor:xs) baseColor number list = 
+_summarize::Column -> Cell -> Int -> [(Cell, Int)] -> [(Cell, Int)]
+_summarize (currentColor:xs) baseColor number list = 
 	if currentColor == baseColor
-		then summarizeHelper xs baseColor (number+1) list
-		else summarizeHelper xs currentColor 1 ((baseColor, number):list)
-summarizeHelper [] baseColor number list = ((baseColor, number):list)
+		then _summarize xs baseColor (number+1) list
+		else _summarize xs currentColor 1 ((baseColor, number):list)
+_summarize [] baseColor number list = ((baseColor, number):list)
 
 summarize::Column->[(Cell,Int)]
-summarize column = summarizeHelper column (column!!0) 0 []
+summarize column = _summarize column (column!!0) 0 []
 
 -- Diagonalize return a list with the composants of diagonals
 -- For instance diagonalize [[1,2],[3,4]] == [[1], [2, 3], [4]]
@@ -68,15 +71,15 @@ addNothing column index reverse =
 		then addNothing ([Empty]++column) (index-1) reverse
 		else addNothing (column++[Empty]) (index-1) reverse
 
-diagonalizeHelper::Grid->Int->Grid
-diagonalizeHelper [] _ = []
-diagonalizeHelper g index = 
+_diagonalize::Grid->Int->Grid
+_diagonalize [] _ = []
+_diagonalize g index = 
 	if index == length g
 		then g
-		else diagonalizeHelper (replace index (addNothing (addNothing (g!!index) index True) ((length g)-index-1) False) g) (index+1) 
+		else _diagonalize (replace index (addNothing (addNothing (g!!index) index True) ((length g)-index-1) False) g) (index+1) 
 
 diagonalize::Grid->Grid
-diagonalize g = diagonalizeHelper g 0
+diagonalize g = _diagonalize g 0
 
 -------------------
 -- MAIN PROGRAM
