@@ -103,6 +103,7 @@ allAlignments::Grid->[Column]
 allAlignments grid = concatMap ($ grid) [diagonalize, diagonalize.(map reverse), id, transpose]
 
 -- Won function return a color if there is a winner, and Nothing if there is no winner yet
+-- FIXME diagonal win is not detected and summurize should be used
 _won:: Column -> Maybe Color
 _won col | length col < 4 = Nothing
 _won (c:cs) | c==Empty || (or$map (/=c)$take (4-1) cs) = _won cs
