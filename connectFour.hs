@@ -25,21 +25,19 @@ type Grid = [Column]
 
 -- Function to print a grid in Terminal
 printGrid::Grid->String
-printGrid g = tail $ concatMap (('\n' :) . (concatMap show)) (transpose g)
+printGrid g = unlines $ (map (concatMap show) (transpose g) ++ [printColNums g])
 
+printColNums:: Grid -> String
+printColNums grid = let legals = legalMoves grid in
+                       concatMap (\x -> if x `elem` legals then " "++show x++" " else "   ")
+                           [1..((length grid)+1)]
 
 -------------------
 -- PLAYING
 -------------------
-
--- adding a token in a column
-_addToken::Column->Column->Color->Column
-_addToken temp [] color = temp
-_addToken temp (Empty:xs) color = concat [temp, (Filled color:xs)]
-_addToken temp (x:xs) color = _addToken (temp++[x]) xs color
-
-addToken::Column->Color->Column
-addToken column color = _addToken [] column color 
+addToken::  Column -> Color ->  Column
+addToken column color = let (empties,fulls) = span (==Empty) column in 
+								tail (empties ++ [Filled color] ++ fulls) 
 
 play::Grid -> Color -> Int -> Grid
 play grid color num = (take (num-1) grid ) ++ [addToken (grid!!(num-1)) color] ++ (drop num grid)
@@ -102,6 +100,10 @@ _won (Filled c:_) = Just c
 
 won:: Grid -> Maybe Color
 won = listToMaybe.catMaybes.(map _won).allAlignments
+
+-- Return the columns where we can legaly play
+legalMoves::Grid -> [Int]
+legalMoves g = map fst (filter ((==Empty).head.snd) (zip [1..] g))
 
 -------------------
 -- MAIN PROGRAM
