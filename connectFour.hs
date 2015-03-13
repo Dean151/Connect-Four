@@ -14,9 +14,9 @@ data Color = Red | Yellow deriving Eq
 -- A cell can be empty, or filled with one of the colors
 data Cell = Empty | Filled Color deriving Eq
 instance Show Cell where 
-	show Empty 			 = "   "
-	show (Filled Red) 	 = " ● "
-	show (Filled Yellow) = " ○ "
+	show Empty 			 = " . "
+	show (Filled Red) 	 = " A "
+	show (Filled Yellow) = " B "
  
 -- Creating aliases types for Columns and Grid
 type Column = [Cell]
@@ -36,10 +36,16 @@ grid = replicate 7 emptyColumn
 -------------------
 
 -- adding a token in a column
-addToken::Column->Column->Color->Column
-addToken temp [] color = temp
-addToken temp (Empty:xs) color = concat [temp, (Filled color:xs)]
-addToken temp (x:xs) color = addToken (temp++[x]) xs color
+_addToken::Column->Column->Color->Column
+_addToken temp [] color = temp
+_addToken temp (Empty:xs) color = concat [temp, (Filled color:xs)]
+_addToken temp (x:xs) color = _addToken (temp++[x]) xs color
+
+addToken::Column->Color->Column
+addToken column color = _addToken [] column color 
+
+play::Grid -> Color -> Int -> Grid
+play grid color num = (take (num-1) grid ) ++ [addToken (grid!!(num-1)) color] ++ (drop num grid)
 
 replace number item list = left ++ (item:right) where (left, (_:right)) = splitAt number list
 
@@ -82,4 +88,8 @@ diagonalize g = diagonalizeHelper g 0
 -- MAIN PROGRAM
 -------------------
 
-main = putStr $ printGrid grid
+grid1 = play grid Yellow 1
+grid2 = play grid1 Yellow 1
+grid3 = play grid2 Red 7
+
+main = putStr $ printGrid grid3
