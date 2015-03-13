@@ -44,6 +44,14 @@ addToken column color = let (empties,fulls) = span (==Empty) column in
 play::Grid -> Color -> Int -> Grid
 play grid color num = (take (num-1) grid ) ++ [addToken (grid!!(num-1)) color] ++ (drop num grid)
 
+gameEven::Grid -> [Int] -> Grid
+gameEven grid [] = grid
+gameEven grid (num:xs) = gameOdd (play grid Yellow num) xs 
+
+gameOdd::Grid -> [Int] -> Grid
+gameOdd grid [] = grid
+gameOdd grid (num:xs) = gameEven (play grid Red num) xs 
+
 replace number item list = left ++ (item:right) where (left, (_:right)) = splitAt number list
 
 -- Return the columns where we can legaly play
@@ -108,11 +116,6 @@ grid::Grid
 grid = replicate 7 (replicate 6 Empty)
 
 -- Testing
-grid1 = play grid Yellow 1
-grid2 = play grid1 Red 1
-grid3 = play grid2 Yellow 1
-grid4 = play grid3 Red 1
-grid5 = play grid4 Yellow 1
-grid6 = play grid5 Red 1
+gridp = gameEven grid [1,2,3,4,5,6,7]
 
-main = putStr $ printGrid grid6
+main = putStr $ printGrid gridp
