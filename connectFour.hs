@@ -35,14 +35,20 @@ printColNums grid = let legals = legalMoves grid in
 -------------------
 -- PLAYING
 -------------------
+-- Add a token in the specified column
 addToken::  Column -> Color ->  Column
 addToken column color = let (empties,fulls) = span (==Empty) column in 
 								tail (empties ++ [Filled color] ++ fulls) 
 
+-- play in the specified column
 play::Grid -> Color -> Int -> Grid
 play grid color num = (take (num-1) grid ) ++ [addToken (grid!!(num-1)) color] ++ (drop num grid)
 
 replace number item list = left ++ (item:right) where (left, (_:right)) = splitAt number list
+
+-- Return the columns where we can legaly play
+legalMoves::Grid -> [Int]
+legalMoves g = map fst (filter ((==Empty).head.snd) (zip [1..] g))
 
 -------------------
 -- CHECK FOR WINNER
@@ -93,10 +99,6 @@ _won (Filled c:_) = Just c
 won:: Grid -> Maybe Color
 won = listToMaybe.catMaybes.(map _won).allAlignments
 
--- Return the columns where we can legaly play
-legalMoves::Grid -> [Int]
-legalMoves g = map fst (filter ((==Empty).head.snd) (zip [1..] g))
-
 -------------------
 -- MAIN PROGRAM
 -------------------
@@ -107,7 +109,10 @@ grid = replicate 7 (replicate 6 Empty)
 
 -- Testing
 grid1 = play grid Yellow 1
-grid2 = play grid1 Yellow 1
-grid3 = play grid2 Red 7
+grid2 = play grid1 Red 1
+grid3 = play grid2 Yellow 1
+grid4 = play grid3 Red 1
+grid5 = play grid4 Yellow 1
+grid6 = play grid5 Red 1
 
-main = putStr $ printGrid grid3
+main = putStr $ printGrid grid6
