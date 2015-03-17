@@ -41,7 +41,9 @@ addToken column color = let (empties,fulls) = span (==Empty) column in
 								tail (empties ++ [Filled color] ++ fulls) 
 
 -- play in the specified column
+-- Here between 1 and 7, playing outside that range is passing your turn
 play::Grid -> Color -> Int -> Grid
+play grid color num | num < 1 || num > 7 = grid
 play grid color num = (take (num-1) grid ) ++ [addToken (grid!!(num-1)) color] ++ (drop num grid)
 
 gameEven::Grid -> [Int] -> Grid
