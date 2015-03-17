@@ -4,20 +4,24 @@
 -------------------------------------------------------------------------------
 import Data.List
 import Data.Maybe
+import Data.Char
+import System.IO
 
 -------------------
 -- STRUCTURE
 -------------------
 
 -- Creating the two colors for the players
-data Color = Red | Yellow deriving Eq
+data Color = Red | Yellow deriving (Eq)
+instance Show Color where
+	show Red 	= " ● "
+	show Yellow = " ○ "
 
 -- A cell can be empty, or filled with one of the colors
-data Cell = Empty | Filled Color deriving Eq
+data Cell = Empty | Filled Color deriving (Eq)
 instance Show Cell where 
-	show Empty 			 = " . "
-	show (Filled Red) 	 = " ● "
-	show (Filled Yellow) = " ○ "
+	show Empty 		= " . "
+	show (Filled c) = show c
  
 -- Creating aliases types for Columns and Grid
 type Column = [Cell]
@@ -101,6 +105,7 @@ allAlignments::Grid->[Column]
 allAlignments grid = concatMap ($ grid) [diagonalize, diagonalize.(map reverse), id, transpose]
 
 -- Won function return a color if there is a winner, and Nothing if there is no winner yet
+-- FIXME diagonal win is not detected and summurize should be used
 _won:: Column -> Maybe Color
 _won col | length col < 4 = Nothing
 _won (c:cs) | c==Empty || (or$map (/=c)$take (4-1) cs) = _won cs
@@ -114,10 +119,45 @@ won = listToMaybe.catMaybes.(map _won).allAlignments
 -------------------
 
 -- Creating the initial empty Grid
-grid::Grid
-grid = replicate 7 (replicate 6 Empty)
+initial::Grid
+initial = replicate 7 (replicate 6 Empty)
 
--- Testing
-gridp = gameEven grid [1,2,3,4,5,6,7]
+-- Generic player
+class Contestant a where
+  move :: a -> Grid -> IO Int -- His play move
+  color :: a -> Color         -- His color
 
-main = putStr $ printGrid gridp
+data Human = Human Color
+
+-- FIXME digitToInt crash if you enter a letter, or a special caracter
+instance Contestant Human where
+  move hum grid = do
+    moveChar <- getChar
+    let moveInt = digitToInt moveChar in 
+      if moveInt `elem` (legalMoves grid) then
+        return moveInt
+      else do
+        putStrLn "This is not a legal move!"
+        move hum grid
+
+  color (Human col) = col
+
+-- Main game loop
+loop::(Contestant a,Contestant b)=>Grid->a->b->IO()
+loop grid a b = do
+  if null $ legalMoves grid then
+    putStrLn "No winner this time!"
+  else do
+    putStrLn $ printGrid grid
+    amove <- move a grid
+    let newgrid = play grid (color a) amove  in do
+      case won newgrid of
+        Just color -> putStrLn (printGrid newgrid ++ "\n" ++ show color ++ "has won !")
+        Nothing    -> loop newgrid b a
+
+
+main :: IO () -- Main function
+main = do
+  hSetBuffering stdin NoBuffering -- Don't wait to press Enter for input
+  hSetEcho stdin False -- Remove the echo on terminal for input character
+  loop initial (Human Red) (Human Yellow) -- Starting loop
